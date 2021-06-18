@@ -1,22 +1,38 @@
-import { StatusBar } from "expo-status-bar";
 import React, { useState } from "react";
 import AppLoading from "expo-app-loading";
 import * as Font from "expo-font";
 import { Asset } from "expo-asset";
 import { Ionicons } from "@expo/vector-icons";
-import { StyleSheet, Text, View } from "react-native";
+import { NavigationContainer } from "@react-navigation/native";
+import { ThemeProvider } from "styled-components/native";
+import { darkTheme, lightTheme } from "./styles";
+import { Appearance, AppearanceProvider } from "react-native-appearance";
+import { ApolloProvider } from "@apollo/client";
+import { client, getTokenToStorage, isLoggedInVar, tokenVar } from "./apollo";
+import TabNav from "./navigators/TabNav";
 
 export default function App() {
   const [loading, setLoading] = useState(true);
+  const theme = Appearance.getColorScheme();
 
   const onFinish = () => setLoading(false);
 
-  const preload = () => {
+  const preloadAssets = () => {
     const fontsToLoad = [Ionicons.font];
     const fontPromises = fontsToLoad.map((font) => Font.loadAsync(font));
     const imageToLoad = [require("./assets/icon.png")];
     const imagePromises = imageToLoad.map((image) => Asset.loadAsync(image));
+
     return Promise.all([...fontPromises, ...imagePromises]);
+  };
+
+  const preload = async () => {
+    const token = await getTokenToStorage();
+    if (token) {
+      isLoggedInVar(true);
+      tokenVar(token);
+    }
+    return preloadAssets();
   };
 
   if (loading) {
@@ -30,18 +46,14 @@ export default function App() {
   }
 
   return (
-    <View style={styles.container}>
-      <Text>Hello Nomad Coffee !</Text>
-      <StatusBar style="auto" />
-    </View>
+    <AppearanceProvider>
+      <ThemeProvider theme={theme === "light" ? lightTheme : darkTheme}>
+        <ApolloProvider client={client}>
+          <NavigationContainer>
+            <TabNav />
+          </NavigationContainer>
+        </ApolloProvider>
+      </ThemeProvider>
+    </AppearanceProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-});
