@@ -5,6 +5,7 @@ import {
   makeVar,
 } from "@apollo/client";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { offsetLimitPagination } from "@apollo/client/utilities";
 import { setContext } from "@apollo/client/link/context";
 
 export const isLoggedInVar = makeVar(false);
@@ -39,5 +40,13 @@ const authLink = setContext((_, { headers }) => {
 
 export const client = new ApolloClient({
   link: authLink.concat(httpLink),
-  cache: new InMemoryCache(),
+  cache: new InMemoryCache({
+    typePolicies: {
+      Query: {
+        fields: {
+          seeCoffeeShops: offsetLimitPagination(),
+        },
+      },
+    },
+  }),
 });
