@@ -38,15 +38,19 @@ const authLink = setContext((_, { headers }) => {
   };
 });
 
-export const client = new ApolloClient({
-  link: authLink.concat(httpLink),
-  cache: new InMemoryCache({
-    typePolicies: {
-      Query: {
-        fields: {
-          seeCoffeeShops: offsetLimitPagination(),
-        },
+export const cache = new InMemoryCache({
+  typePolicies: {
+    Query: {
+      fields: {
+        seeCoffeeShops: offsetLimitPagination(),
       },
     },
-  }),
+  },
 });
+
+const client = new ApolloClient({
+  link: authLink.concat(httpLink),
+  cache,
+});
+
+export default client;

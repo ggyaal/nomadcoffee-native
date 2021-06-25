@@ -8,8 +8,15 @@ import { ThemeProvider } from "styled-components/native";
 import { darkTheme, lightTheme } from "./styles";
 import { Appearance, AppearanceProvider } from "react-native-appearance";
 import { ApolloProvider } from "@apollo/client";
-import { client, getTokenToStorage, isLoggedInVar, tokenVar } from "./apollo";
+import client, {
+  getTokenToStorage,
+  isLoggedInVar,
+  tokenVar,
+  cache,
+} from "./apollo";
 import TabNav from "./navigators/TabNav";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { AsyncStorageWrapper, persistCache } from "apollo3-cache-persist";
 
 export default function App() {
   const [loading, setLoading] = useState(true);
@@ -32,6 +39,12 @@ export default function App() {
       isLoggedInVar(true);
       tokenVar(token);
     }
+
+    await persistCache({
+      cache,
+      storage: new AsyncStorageWrapper(AsyncStorage),
+    });
+
     return preloadAssets();
   };
 

@@ -73,7 +73,9 @@ export default function Photo({
           text={user.name}
           bold={600}
           size={16}
-          onPress={() => navigation.navigate("Profile")}
+          onPress={() =>
+            navigation.navigate("Profile", { username: user?.name })
+          }
         />
       </Header>
       <Main>
